@@ -6,7 +6,7 @@ var ctx = canvas.getContext('2d');
 var raf;
 var rows = 20;
 var cols = 20;
-var scl = window.innerHeight > window.innerWidth ? Math.floor(window.innerHeight / cols) - 1 : Math.floor(window.innerWidth / rows) - 1;
+var scl = Math.floor(window.innerHeight / rows) - 1;
 var fps= 10;
 var hasLost = false;
 
