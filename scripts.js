@@ -15,7 +15,7 @@ canvas.height = rows * scl;
 
 class Snake {
     constructor() {
-        this.x = Math.floor(canvas.width / 2);
+        this.x = 0;
         this.y = Math.floor(canvas.height / 2);
         this.xspeed = 1;
         this.yspeed = 0;
@@ -90,9 +90,21 @@ class Food {
             ctx.fillRect(this.x, this.y, scl, scl);
         };
 
+        this.locationAtSnake = function() {
+            for (var i = 0; i < snake.body.length; i++) {
+                if ([this.x, this.y] == snake.body[i].toString()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         this.newLocation = function() {
+            // loop to prevent it from spawning where the snake is
+            do {
             this.x = Math.floor(Math.random() * cols) * scl;
             this.y = Math.floor(Math.random() * rows) * scl;
+            } while(this.locationAtSnake());
         };
     }
 }
