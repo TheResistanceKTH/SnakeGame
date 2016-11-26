@@ -4,14 +4,16 @@
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var raf;
-var rows = 20;
-var cols = 20;
-var scl = window.innerHeight < window.innerWidth ? Math.floor(window.innerHeight / rows) - 1 : Math.floor(window.innerWidth / cols) - 1;
+var sideLength = 20;
+// scales to fit player's window
+var scl = window.innerHeight < window.innerWidth ? Math.floor(window.innerHeight / sideLength) - 1 :
+                                                   Math.floor(window.innerWidth / sideLength) - 1;
 var fps= 10;
 var hasLost = false;
+var firstPlay = true;
 
-canvas.width = cols * scl;
-canvas.height = rows * scl;
+canvas.width = sideLength * scl;
+canvas.height = sideLength * scl;
 
 class Snake {
     constructor() {
@@ -82,8 +84,8 @@ class Snake {
 
 class Food {
     constructor() {
-        this.x = Math.floor(Math.random() * cols) * scl;
-        this.y = Math.floor(Math.random() * rows) * scl;
+        this.x = Math.floor(Math.random() * sideLength) * scl;
+        this.y = Math.floor(Math.random() * sideLength) * scl;
 
         this.draw = function() {
             ctx.fillStyle = 'red';
@@ -102,22 +104,37 @@ class Food {
         this.newLocation = function() {
             // loop to prevent it from spawning where the snake is
             do {
-            this.x = Math.floor(Math.random() * cols) * scl;
-            this.y = Math.floor(Math.random() * rows) * scl;
+            this.x = Math.floor(Math.random() * sideLength) * scl;
+            this.y = Math.floor(Math.random() * sideLength) * scl;
             } while(this.locationAtSnake());
         };
     }
 }
 
-var snake = new Snake();
-var food = new Food();
+var snake;
+var food;
+function setUp() {
+    snake = new Snake();
+    food = new Food();
+}
 
 function drawCanvas() {
     setTimeout(function() {
         raf = window.requestAnimationFrame(drawCanvas);
         ctx.fillStyle = '#696969';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        if (!hasLost) {
+        if (firstPlay) {
+            ctx.font = '60px Helvetica';
+            ctx.strokeStyle = 'white';
+            ctx.strokeText('Snake!', 30, 100);
+
+            ctx.font = '40px Helvetica';
+            ctx.fillStyle = 'white';
+            ctx.fillText('Press enter to play', 30, canvas.width/2);
+
+            ctx.font = '30px Helvetica';
+            ctx.fillText('Use \'WASD\' or arrows for movement', 30, canvas.width/2 + 50);
+        } else if (!hasLost) {
             snake.update();
             snake.draw();
 
@@ -127,13 +144,12 @@ function drawCanvas() {
 
             food.draw();
         } else {
-            fps = 1;
             ctx.font = '40px Helvetica';
             ctx.fillStyle = 'white';
             ctx.fillText("You lose! Your score was: " + snake.size, 30, canvas.width/2);
 
             ctx.font = '30px Helvetica';
-            ctx.fillText('Reload the page to play again', 30, canvas.width/2 + 50);
+            ctx.fillText('Press enter to play again', 30, canvas.width/2 + 50);
 
         }
     }, 1000 / fps);
@@ -156,6 +172,16 @@ document.onkeydown = function(e) {
         case 40:
         case 83: // s
             snake.changeDir(0, 1);
+            break;
+        case 13: // enter
+            if (firstPlay) {
+                firstPlay = false;
+                setUp();
+            }
+            if (hasLost) {
+                hasLost = false;
+                setUp();
+            }
             break;
     }
 };
