@@ -1,25 +1,26 @@
-/**
- * Created by TheSpine on 25/11/16.
- */
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var raf;
 var sideLength = 20;
+var fps= 10; // affects how fast the snake moves
+var firstPlay = true;
+var hasLost = false;
+var movedThisFrame = false;
+
 // scales to fit player's window
 var scl = window.innerHeight < window.innerWidth ? Math.floor(window.innerHeight / sideLength) - 1 :
                                                    Math.floor(window.innerWidth / sideLength) - 1;
-var fps= 10;
-var hasLost = false;
-var firstPlay = true;
-var movedThisFrame = false;
 
 canvas.width = sideLength * scl;
 canvas.height = sideLength * scl;
 
+var snake;
+var food;
+
 class Snake {
     constructor() {
         this.x = 0;
-        this.y = Math.floor(canvas.height / 2);
+        this.y = Math.floor(sideLength/2 * scl);
         this.xspeed = 1;
         this.yspeed = 0;
 
@@ -38,9 +39,9 @@ class Snake {
         this.updateTail = function() {
             if (this.size === this.body.length) {
                 for (var i = 0; i < this.body.length - 1; i++) {
-                    this.body[i] = this.body[i + 1];
+                    this.body[i] = this.body[i+1];
                 }
-                this.body[this.body.length -1] = [this.x, this.y];
+                this.body[this.body.length - 1] = [this.x, this.y];
             } else {
                 this.body[this.body.length] = [this.x, this.y];
             }
@@ -52,7 +53,7 @@ class Snake {
             this.x += this.xspeed * scl;
             this.y += this.yspeed * scl;
 
-            if (this.x === food.x && this.y === food.y) {
+            if ([this.x, this.y] == [food.x, food.y].toString()) {
                 // we're at the food!
                 this.size++;
                 food.newLocation();
@@ -81,15 +82,15 @@ class Snake {
 
 class Food {
     constructor() {
-        this.x = Math.floor(Math.random() * sideLength) * scl;
-        this.y = Math.floor(Math.random() * sideLength) * scl;
+        this.x = -1;
+        this.y = -1;
 
         this.draw = function() {
             ctx.fillStyle = 'red';
             ctx.fillRect(this.x, this.y, scl, scl);
         };
 
-        this.locationAtSnake = function() {
+        this.locationIsAtSnake = function() {
             for (var i = 0; i < snake.body.length; i++) {
                 if ([this.x, this.y] == snake.body[i].toString()) {
                     return true;
@@ -103,16 +104,9 @@ class Food {
             do {
             this.x = Math.floor(Math.random() * sideLength) * scl;
             this.y = Math.floor(Math.random() * sideLength) * scl;
-            } while(this.locationAtSnake());
+            } while(this.locationIsAtSnake());
         };
     }
-}
-
-var snake;
-var food;
-function setUp() {
-    snake = new Snake();
-    food = new Food();
 }
 
 function drawCanvas() {
@@ -120,74 +114,86 @@ function drawCanvas() {
         raf = window.requestAnimationFrame(drawCanvas);
         ctx.fillStyle = '#696969';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         if (firstPlay) {
-            ctx.font = '60px Helvetica';
-            ctx.strokeStyle = 'white';
-            ctx.strokeText('Snake!', 30, 100);
-
-            ctx.font = '40px Helvetica';
-            ctx.fillStyle = 'white';
-            ctx.fillText('Press enter to play', 30, canvas.width/2);
-
-            ctx.font = '30px Helvetica';
-            ctx.fillText('Use \'WASD\' or arrows for movement', 30, canvas.width/2 + 50);
+            drawStartScreen();
         } else if (hasLost) {
-            ctx.font = '40px Helvetica';
-            ctx.fillStyle = 'white';
-            ctx.fillText("You lose! Your score was: " + snake.size, 30, canvas.width/2);
-
-            ctx.font = '30px Helvetica';
-            ctx.fillText('Press enter to play again', 30, canvas.width/2 + 50);
+            drawLostScreen();
         } else {
-            snake.update();
-            snake.draw();
-
-            if (snake.hasDied()) {
-                hasLost = true;
-            }
-
-            food.draw();
-            movedThisFrame = false;
+            runGame();
         }
+        movedThisFrame = false;
     }, 1000 / fps);
 }
 
+function drawStartScreen() {
+    ctx.fillStyle = 'white';
+    ctx.strokeStyle = 'white';
+
+    ctx.font = '60px Helvetica';
+    ctx.strokeText('Snake!', 30, 100);
+
+    ctx.font = '40px Helvetica';
+    ctx.fillText('Press enter to play', 30, canvas.width/2);
+
+    ctx.font = '30px Helvetica';
+    ctx.fillText('Use \'WASD\' or arrows for movement', 30, canvas.width/2 + 50);
+}
+
+function drawLostScreen() {
+    ctx.fillStyle = 'white';
+
+    ctx.font = '40px Helvetica';
+    ctx.fillText("You lose! Your score was: " + (snake.size - 1), 30, canvas.width/2);
+
+    ctx.font = '30px Helvetica';
+    ctx.fillText('Press enter to play again', 30, canvas.width/2 + 50);
+}
+
+function runGame() {
+    snake.update();
+    snake.draw();
+    food.draw();
+
+    if (snake.hasDied()) {
+        hasLost = true;
+    }
+}
+
+function setUp() {
+    snake = new Snake();
+    food = new Food();
+    food.newLocation();
+}
+
 document.onkeydown = function(e) {
+    if (movedThisFrame) {
+        return;
+    }
     switch (e.keyCode) {
-        case 37:
+        case 37: // left arrow
         case 65: // a
-            if (!movedThisFrame) {
-                snake.changeDir(-1, 0);
-                movedThisFrame = true;
-            }
+            snake.changeDir(-1, 0);
+            movedThisFrame = true;
             break;
-        case 39:
+        case 39: // right arrow
         case 68: // d
-            if (!movedThisFrame) {
-                snake.changeDir(1, 0);
-                movedThisFrame = true;
-            }
+            snake.changeDir(1, 0);
+            movedThisFrame = true;
             break;
-        case 38:
+        case 38: // up arrow
         case 87: // w
-            if (!movedThisFrame) {
-                snake.changeDir(0, -1);
-                movedThisFrame = true;
-            }
+            snake.changeDir(0, -1);
+            movedThisFrame = true;
             break;
-        case 40:
+        case 40: // down arrow
         case 83: // s
-            if (!movedThisFrame) {
-                snake.changeDir(0, 1);
-                movedThisFrame = true;
-            }
+            snake.changeDir(0, 1);
+            movedThisFrame = true;
             break;
         case 13: // enter
-            if (firstPlay) {
+            if (firstPlay || hasLost) {
                 firstPlay = false;
-                setUp();
-            }
-            if (hasLost) {
                 hasLost = false;
                 setUp();
             }
