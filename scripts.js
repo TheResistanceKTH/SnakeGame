@@ -65,12 +65,8 @@ class Snake {
                     return true;
                 }
             }
-            if (this.x < 0 || this.x > canvas.width - scl || this.y < 0 || this.y > canvas.height - scl) {
-                // if you are against a wall and try to move into it, you die
-                return true;
-            }
-            return false;
-        }
+            return this.x < 0 || this.x > canvas.width - scl || this.y < 0 || this.y > canvas.height - scl;
+        };
 
         this.changeDir = function(x, y) {
             if (this.xspeed === -x || this.yspeed === -y) {
@@ -79,7 +75,7 @@ class Snake {
             }
             this.xspeed = x;
             this.yspeed = y;
-        }
+        };
     }
 }
 
@@ -100,7 +96,7 @@ class Food {
                 }
             }
             return false;
-        }
+        };
 
         this.newLocation = function() {
             // loop to prevent it from spawning where the snake is
@@ -157,26 +153,34 @@ function drawCanvas() {
 }
 
 document.onkeydown = function(e) {
-    if (movedThisFrame) {
-        return;
-    }
-    movedThisFrame = true;
     switch (e.keyCode) {
         case 37:
         case 65: // a
-            snake.changeDir(-1, 0);
+            if (!movedThisFrame) {
+                snake.changeDir(-1, 0);
+                movedThisFrame = true;
+            }
             break;
         case 39:
         case 68: // d
-            snake.changeDir(1, 0);
+            if (!movedThisFrame) {
+                snake.changeDir(1, 0);
+                movedThisFrame = true;
+            }
             break;
         case 38:
         case 87: // w
-            snake.changeDir(0, -1);
+            if (!movedThisFrame) {
+                snake.changeDir(0, -1);
+                movedThisFrame = true;
+            }
             break;
         case 40:
         case 83: // s
-            snake.changeDir(0, 1);
+            if (!movedThisFrame) {
+                snake.changeDir(0, 1);
+                movedThisFrame = true;
+            }
             break;
         case 13: // enter
             if (firstPlay) {
