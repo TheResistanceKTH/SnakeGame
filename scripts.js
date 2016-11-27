@@ -76,6 +76,7 @@ class Snake {
             }
             this.xspeed = x;
             this.yspeed = y;
+            movedThisFrame = true;
         };
     }
 }
@@ -174,22 +175,18 @@ document.onkeydown = function(e) {
         case 37: // left arrow
         case 65: // a
             snake.changeDir(-1, 0);
-            movedThisFrame = true;
             break;
         case 39: // right arrow
         case 68: // d
             snake.changeDir(1, 0);
-            movedThisFrame = true;
             break;
         case 38: // up arrow
         case 87: // w
             snake.changeDir(0, -1);
-            movedThisFrame = true;
             break;
         case 40: // down arrow
         case 83: // s
             snake.changeDir(0, 1);
-            movedThisFrame = true;
             break;
         case 13: // enter
             if (firstPlay || hasLost) {
