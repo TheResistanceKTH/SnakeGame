@@ -11,6 +11,7 @@ var scl = window.innerHeight < window.innerWidth ? Math.floor(window.innerHeight
 var fps= 10;
 var hasLost = false;
 var firstPlay = true;
+var movedThisFrame = false;
 
 canvas.width = sideLength * scl;
 canvas.height = sideLength * scl;
@@ -134,7 +135,14 @@ function drawCanvas() {
 
             ctx.font = '30px Helvetica';
             ctx.fillText('Use \'WASD\' or arrows for movement', 30, canvas.width/2 + 50);
-        } else if (!hasLost) {
+        } else if (hasLost) {
+            ctx.font = '40px Helvetica';
+            ctx.fillStyle = 'white';
+            ctx.fillText("You lose! Your score was: " + snake.size, 30, canvas.width/2);
+
+            ctx.font = '30px Helvetica';
+            ctx.fillText('Press enter to play again', 30, canvas.width/2 + 50);
+        } else {
             snake.update();
             snake.draw();
 
@@ -143,19 +151,16 @@ function drawCanvas() {
             }
 
             food.draw();
-        } else {
-            ctx.font = '40px Helvetica';
-            ctx.fillStyle = 'white';
-            ctx.fillText("You lose! Your score was: " + snake.size, 30, canvas.width/2);
-
-            ctx.font = '30px Helvetica';
-            ctx.fillText('Press enter to play again', 30, canvas.width/2 + 50);
-
+            movedThisFrame = false;
         }
     }, 1000 / fps);
 }
 
 document.onkeydown = function(e) {
+    if (movedThisFrame) {
+        return;
+    }
+    movedThisFrame = true;
     switch (e.keyCode) {
         case 37:
         case 65: // a
