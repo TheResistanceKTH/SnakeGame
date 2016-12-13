@@ -63,8 +63,7 @@ function drawLostScreen() {
     for (var i = 0; i < top5; i++) {
         var score = scores[i];
         var scoreString = (i + 1) + '.  ' + score.score + " - " + score.name;
-        console.log(scoreString);
-        ctx.fillText(scoreString, 30, 380 + 30*i)
+        ctx.fillText(scoreString, 30, 385 + 30*i)
     }
 }
 
