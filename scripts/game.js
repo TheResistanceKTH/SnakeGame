@@ -72,7 +72,9 @@ function runGame() {
     snake.draw();
     food.draw();
 
-    if (snake.hasDied()) { hasLost = true; }
+    if (snake.hasDied()) {
+        hasLost = true;
+    }
 }
 
 function setUp() {
@@ -119,7 +121,6 @@ document.onkeydown = function(e) {
         case 72: //h
             if (hasLost && !hasSubmitted) {
                 submitHighScore();
-                hasSubmitted = true;
             }
             break;
     }

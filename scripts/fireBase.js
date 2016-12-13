@@ -34,10 +34,12 @@ function getHighScores() {
 
 function submitHighScore() {
     var name = window.prompt("Enter your name to submit highscore");
-    var score = {
-        name: name,
-        score: snake.size - 1
-    };
-    highScoreRef.push(score);
+    if (name) {
+        hasSubmitted = true;
+        var score = {
+            name: name,
+            score: snake.size - 1
+        };
+        highScoreRef.push(score);
+    }
 }
-
